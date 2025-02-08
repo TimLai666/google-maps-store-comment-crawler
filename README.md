@@ -17,6 +17,11 @@
       - `maxWaitingInterval`: 最大等待時間，程式會在爬取每次爬取下一頁時自動等待 1~n 秒，預設為 5000 毫秒（5秒）。
 
     - 範例：
+
     ```javascript
-    fetchGoogleMapsComments('星巴克').then(comments => console.log(comments));
+    import fetchGoogleMapsComments from "./crawler.js";
+
+    fetchGoogleMapsComments("全家").then((comments) => {
+      console.log(comments);
+    });
     ```

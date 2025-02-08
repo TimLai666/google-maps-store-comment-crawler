@@ -85,7 +85,7 @@ class GoogleMapsCommentCrawler {
     }
 }
 
-async function fetchGoogleMapsComments(storeName, pageCount = 1, maxWaitingInterval = 5000) {
+const fetchGoogleMapsComments = async (storeName, pageCount = 1, maxWaitingInterval = 5000) => {
     if (!storeName) {
         throw new Error("請輸入店名");
     }
@@ -99,3 +99,6 @@ async function fetchGoogleMapsComments(storeName, pageCount = 1, maxWaitingInter
 
     return comments;
 }
+
+// ESM 匯出
+export default fetchGoogleMapsComments;
