@@ -26,8 +26,9 @@ class GoogleMapsCommentCrawler {
     async getComments(storeId, pageCount = 1, sortedBy = 2, maxWaitingInterval = 5000) {
         let nextToken = "";
         let comments = [];
+        let page = 1;
 
-        for (let page = 1; page <= pageCount; page++) {
+        while (pageCount === 0 || page <= pageCount) {
             console.log(`正在抓取第 ${page} 頁評論...`);
 
             const params = {
@@ -67,8 +68,9 @@ class GoogleMapsCommentCrawler {
                     //     console.error("解析評論時發生錯誤:", parseError.message);
                     // }
                 });
+                page++;
 
-                if (!nextToken) break;
+                if (!nextToken || page === pageCount) break;
             } catch (error) {
                 console.error("獲取評論失敗:", error.message);
                 break;
@@ -83,7 +85,7 @@ class GoogleMapsCommentCrawler {
     }
 }
 
-async function fetchGoogleMapsComments(storeName, pageCount = 3, maxWaitingInterval = 5000) {
+async function fetchGoogleMapsComments(storeName, pageCount = 1, maxWaitingInterval = 5000) {
     if (!storeName) {
         throw new Error("請輸入店名");
     }
@@ -97,4 +99,3 @@ async function fetchGoogleMapsComments(storeName, pageCount = 3, maxWaitingInter
 
     return comments;
 }
-
