@@ -9,7 +9,7 @@ class GoogleMapsCommentCrawler {
             const config = await response.json();
             this.headers = config.headers;
             this.storeNameUrl = config.storeNameUrl;
-            this.storeSearchUrl = config.storeIdUrl;
+            this.storeSearchUrl = config.storeSearchUrl;
             this.commentUrl = config.commentUrl;
         } catch (error) {
             console.error("初始化失敗:", error);
