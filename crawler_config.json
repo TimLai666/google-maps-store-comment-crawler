@@ -1,0 +1,8 @@
+{
+    "headers": {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36"
+    },
+    "storeIdUrl": "https://www.google.com.tw/maps/search/{store_name}",
+    "storeNameUrl": "https://www.google.com.tw/maps/place/data=!4m5!3m4!1s{store_id}!8m2!3d25.0564743!4d121.5204167?authuser=0&hl=zh-TW&rclk=1",
+    "commentUrl": "https://www.google.com.tw/maps/rpc/listugcposts"
+}
