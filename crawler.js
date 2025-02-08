@@ -1,11 +1,19 @@
 class GoogleMapsCommentCrawler {
     constructor() {
-        this.headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
-        };
-        this.storeNameUrl = "https://www.google.com.tw/maps/place/data=!4m5!3m4!1s{store_id}!8m2!3d25.0564743!4d121.5204167?authuser=0&hl=zh-TW&rclk=1"
-        this.storeSearchUrl = "https://www.google.com/maps/search/{store_name}";
-        this.commentUrl = "https://www.google.com/maps/rpc/listugcposts";
+        this.initialized = this.initialize();
+    }
+
+    async initialize() {
+        try {
+            const response = await fetch("https://raw.githubusercontent.com/TimLai666/google-maps-store-comment-crawler/refs/heads/main/crawler_config.json");
+            const config = await response.json();
+            this.headers = config.headers;
+            this.storeNameUrl = config.storeNameUrl;
+            this.storeSearchUrl = config.storeIdUrl;
+            this.commentUrl = config.commentUrl;
+        } catch (error) {
+            console.error("初始化失敗:", error);
+        }
     }
 
     async getRelatedStores(storeName) {
@@ -149,6 +157,7 @@ const fetchStoreCommentsByName = async (storeName, pageCount = 1, maxWaitingInte
     }
 
     const crawler = new GoogleMapsCommentCrawler();
+    await crawler.initialized;
     const storeId = await crawler.getStoreId(storeName);
     if (!storeId) throw new Error("無法獲取商家 ID");
 
@@ -164,6 +173,7 @@ const fetchGoogleMapsStores = async (storeName) => {
     }
 
     const crawler = new GoogleMapsCommentCrawler();
+    await crawler.initialized;
     const storeArray = await crawler.getRelatedStores(storeName);
 
     return storeArray;
@@ -175,6 +185,7 @@ const fetchStoreCommentsById = async (storeId, pageCount = 1, maxWaitingInterval
     }
 
     const crawler = new GoogleMapsCommentCrawler();
+    await crawler.initialized;
     const comments = await crawler.getComments(storeId, pageCount, 2, maxWaitingInterval);
 
     return comments;
