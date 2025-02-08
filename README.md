@@ -27,7 +27,7 @@
     ```
 
     - 查詢名稱相近的店家：
-      - 呼叫 `fetchGoogleMapsStores` 函式，並傳入商家名稱，即可取得名稱相近的店家。
+      - 呼叫 `fetchGoogleMapsStores` 函式，並傳入商家名稱，即可取得名稱相近的店家列表。
       - 參數
         - `storeName`: 商家名稱。
       - 回傳值
