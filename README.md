@@ -2,6 +2,8 @@
 
 這是一個用於爬取 Google 商家評論的爬蟲程式，輸入商家名稱，即可爬取該商家的評論。
 
+程式碼改自 [【網路爬蟲】使用 API 方式爬取 Google 商家評論爬取（附Python程式碼）](https://medium.com/p/5465a19a31b7)。
+
 ## 使用方式
 
 此爬蟲有 Python 和 JavaScript 兩個版本：
