@@ -5,7 +5,7 @@ class GoogleMapsCommentCrawler {
 
     async initialize() {
         try {
-            const response = await fetch("https://raw.githubusercontent.com/TimLai666/google-maps-store-comment-crawler/refs/heads/main/crawler_config.json");
+            const response = await fetch("https://raw.githubusercontent.com/TimLai666/google-maps-store-comment-crawler/main/crawler_config.json");
             const config = await response.json();
             this.headers = config.headers;
             this.storeNameUrl = config.storeNameUrl;
