@@ -3,8 +3,46 @@ class GoogleMapsCommentCrawler {
         this.headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
         };
+        this.storeNameUrl = "https://www.google.com.tw/maps/place/data=!4m5!3m4!1s{store_id}!8m2!3d25.0564743!4d121.5204167?authuser=0&hl=zh-TW&rclk=1"
         this.storeSearchUrl = "https://www.google.com/maps/search/{store_name}";
         this.commentUrl = "https://www.google.com/maps/rpc/listugcposts";
+    }
+
+    async getRelatedStores(storeName) {
+        const url = this.storeSearchUrl.replace('{store_name}', storeName);
+
+        async function fetchUrl(url, headers) {
+            try {
+                const response = await fetch(url, { headers });
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                return await response.text();
+            } catch (error) {
+                throw new Error(`Request failed: ${error.message}`);
+            }
+        }
+
+        try {
+            const response = await fetchUrl(url, this.headers);
+            const pattern = /0x.{16}:0x.{16}/g;
+
+            let storeIdList = new Set(response.match(pattern) || []);
+            storeIdList = [...storeIdList].map(storeId => storeId.replace('\\', ''));
+
+            let storeDict = {};
+            for (let storeId of storeIdList) {
+                try {
+                    const storeName = await this.getStoreName(storeId);
+                    storeDict[storeName] = storeId;
+                } catch (error) {
+                    console.error(`Error fetching store name for ${storeId}:`, error);
+                }
+            }
+
+            return storeDict;
+        } catch (error) {
+            console.error('Error fetching store data:', error);
+            return {};
+        }
     }
 
     async getStoreId(storeName) {
@@ -22,6 +60,29 @@ class GoogleMapsCommentCrawler {
             return null;
         }
     }
+
+    async getStoreName(storeId) {
+        const url = this.storeNameUrl.replace('{store_id}', storeId);
+        const headers = this.headers;
+        const res = await fetch(url, { headers });
+        if (!res.ok) throw new Error('無法取得商家資料');
+        const html = await res.text();
+
+        const metaTags = html.match(/<meta[^>]*itemprop=["']name["'][^>]*>/gi);
+        if (!metaTags || metaTags.length === 0) throw new Error('無法取得商家資料');
+
+        let name = '';
+        for (const tag of metaTags) {
+            const match = tag.match(/".*·/);
+            if (match) {
+                name = match[0].substring(1, match[0].length - 2);
+                break;
+            }
+        }
+        if (!name) throw new Error('無法取得商家資料');
+        return name;
+    }
+
 
     async getComments(storeId, pageCount = 1, sortedBy = 2, maxWaitingInterval = 5000) {
         let nextToken = "";
@@ -52,7 +113,6 @@ class GoogleMapsCommentCrawler {
                 nextToken = jsonData[1];
 
                 jsonData[2].forEach(comment_data => {
-                    // try {
                     const commentDate = comment_data?.at(0)?.at(2)?.at(2)?.at(0)?.at(1)?.at(21)?.at(6);
                     comments.push({
                         "評論者": comment_data[0][1][4][5][0],
@@ -64,9 +124,6 @@ class GoogleMapsCommentCrawler {
                         "評論": comment_data[0][2].at(-1)[0][0],
                         "評論分數": comment_data[0][2][0][0]
                     });
-                    // } catch (parseError) {
-                    //     console.error("解析評論時發生錯誤:", parseError.message);
-                    // }
                 });
                 page++;
 
@@ -85,7 +142,7 @@ class GoogleMapsCommentCrawler {
     }
 }
 
-const fetchGoogleMapsComments = async (storeName, pageCount = 1, maxWaitingInterval = 5000) => {
+const fetchStoreCommentsByName = async (storeName, pageCount = 1, maxWaitingInterval = 5000) => {
     if (!storeName) {
         throw new Error("請輸入店名");
     }
@@ -100,5 +157,27 @@ const fetchGoogleMapsComments = async (storeName, pageCount = 1, maxWaitingInter
     return comments;
 }
 
+const fetchGoogleMapsStores = async (storeName) => {
+    if (!storeName) {
+        throw new Error("請輸入店名");
+    }
+
+    const crawler = new GoogleMapsCommentCrawler();
+    const storeDict = await crawler.getRelatedStores(storeName);
+
+    return storeDict;
+}
+
+const fetchStoreCommentsById = async (storeId, pageCount = 1, maxWaitingInterval = 5000) => {
+    if (!storeId) {
+        throw new Error("請輸入商家 ID");
+    }
+
+    const crawler = new GoogleMapsCommentCrawler();
+    const comments = await crawler.getComments(storeId, pageCount, 2, maxWaitingInterval);
+
+    return comments;
+}
+
 // ESM 匯出
-export default fetchGoogleMapsComments;
+export { fetchStoreCommentsByName, fetchGoogleMapsStores, fetchStoreCommentsById };
