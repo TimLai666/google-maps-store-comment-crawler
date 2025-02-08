@@ -98,7 +98,3 @@ async function fetchGoogleMapsComments(storeName, pageCount = 3, maxWaitingInter
     return comments;
 }
 
-// 測試
-fetchGoogleMapsComments("1985窯烤披薩 永和永利店", 1).then(comments => {
-    console.log(comments);
-});
