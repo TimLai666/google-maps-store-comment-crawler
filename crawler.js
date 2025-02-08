@@ -28,17 +28,18 @@ class GoogleMapsCommentCrawler {
             let storeIdList = new Set(response.match(pattern) || []);
             storeIdList = [...storeIdList].map(storeId => storeId.replace('\\', ''));
 
-            let storeDict = {};
+            let storeArray = [];
             for (let storeId of storeIdList) {
                 try {
                     const storeName = await this.getStoreName(storeId);
-                    storeDict[storeName] = storeId;
+                    const storeObj = { id: storeId, name: storeName };
+                    storeArray.push(storeObj);
                 } catch (error) {
                     console.error(`Error fetching store name for ${storeId}:`, error);
                 }
             }
 
-            return storeDict;
+            return storeArray;
         } catch (error) {
             console.error('Error fetching store data:', error);
             return {};
@@ -163,9 +164,9 @@ const fetchGoogleMapsStores = async (storeName) => {
     }
 
     const crawler = new GoogleMapsCommentCrawler();
-    const storeDict = await crawler.getRelatedStores(storeName);
+    const storeArray = await crawler.getRelatedStores(storeName);
 
-    return storeDict;
+    return storeArray;
 }
 
 const fetchStoreCommentsById = async (storeId, pageCount = 1, maxWaitingInterval = 5000) => {
