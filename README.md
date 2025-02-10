@@ -12,8 +12,8 @@
 
 - JavaScript 版本：`crawler.js`，可自行下載原始碼用於 node.js 環境。
   - 使用方式：
-    1. 呼叫 `fetchStoreCommentsByName` 函式，並傳入商家名稱，即可取得該商家的評論。
-    2. 呼叫 `fetchStoreCommentsById` 函式，並傳入商家 ID，即可取得該商家的評論。
+    1. 呼叫 `fetchStoreReviewsByName` 函式，並傳入商家名稱，即可取得該商家的評論。
+    2. 呼叫 `fetchStoreReviewsById` 函式，並傳入商家 ID，即可取得該商家的評論。
     - 參數
       - `storeName` / `storeId`: 商家名稱 / 商家 ID。
       - `pageCount`(可選): 要爬取的評論頁數，設為 0 可爬取所有頁面，預設為 1。
@@ -21,10 +21,10 @@
 
     - 範例：
     ```javascript
-    import { fetchStoreCommentsByName } from "./crawler.js";
+    import { fetchStoreReviewsByName } from "./crawler.js";
 
-    fetchStoreCommentsByName("全家").then((comments) => {
-      console.log(comments);
+    fetchStoreReviewsByName("全家").then((reviews) => {
+      console.log(reviews);
     });
     ```
 

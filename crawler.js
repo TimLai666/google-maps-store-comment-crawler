@@ -1,16 +1,16 @@
-class GoogleMapsCommentCrawler {
+class GoogleMapsReviewCrawler {
     constructor() {
         this.initialized = this.initialize();
     }
 
     async initialize() {
         try {
-            const response = await fetch("https://raw.githubusercontent.com/TimLai666/google-maps-store-comment-crawler/main/crawler_config.json");
+            const response = await fetch("https://raw.githubusercontent.com/TimLai666/google-maps-store-review-crawler/refs/heads/main/crawler_config.json");
             const config = await response.json();
             this.headers = config.headers;
             this.storeNameUrl = config.storeNameUrl;
             this.storeSearchUrl = config.storeSearchUrl;
-            this.commentUrl = config.commentUrl;
+            this.reviewUrl = config.reviewUrl;
         } catch (error) {
             console.error("初始化失敗:", error);
         }
@@ -93,9 +93,9 @@ class GoogleMapsCommentCrawler {
     }
 
 
-    async getComments(storeId, pageCount = 1, sortedBy = 2, maxWaitingInterval = 5000) {
+    async getReviews(storeId, pageCount = 1, sortedBy = 2, maxWaitingInterval = 5000) {
         let nextToken = "";
-        let comments = [];
+        let reviews = [];
         let page = 1;
 
         while (pageCount === 0 || page <= pageCount) {
@@ -114,24 +114,24 @@ class GoogleMapsCommentCrawler {
 
             try {
                 const urlParams = new URLSearchParams(params).toString();
-                const response = await fetch(`${this.commentUrl}?${urlParams}`, { headers: this.headers });
+                const response = await fetch(`${this.reviewUrl}?${urlParams}`, { headers: this.headers });
                 if (!response.ok) throw new Error("獲取評論失敗: 無效的回應");
 
                 const text = await response.text();
                 const jsonData = JSON.parse(text.substring(4)); // Google 回應前綴 `)]}'`
                 nextToken = jsonData[1];
 
-                jsonData[2].forEach(comment_data => {
-                    const commentDate = comment_data?.at(0)?.at(2)?.at(2)?.at(0)?.at(1)?.at(21)?.at(6);
-                    comments.push({
-                        "評論者": comment_data[0][1][4][5][0],
-                        "評論者id": comment_data[0][0],
-                        "評論者狀態": comment_data[0][1][4][5][10][0],
-                        "評論者等級": comment_data[0][1][4][5][9],
-                        "留言時間": comment_data[0][1][6],
-                        "留言日期": commentDate ? commentDate.at(-1) : null,
-                        "評論": comment_data[0][2].at(-1)[0][0],
-                        "評論分數": comment_data[0][2][0][0]
+                jsonData[2].forEach(review_data => {
+                    const reviewDate = review_data?.at(0)?.at(2)?.at(2)?.at(0)?.at(1)?.at(21)?.at(6);
+                    reviews.push({
+                        "評論者": review_data[0][1][4][5][0],
+                        "評論者id": review_data[0][0],
+                        "評論者狀態": review_data[0][1][4][5][10][0],
+                        "評論者等級": review_data[0][1][4][5][9],
+                        "留言時間": review_data[0][1][6],
+                        "留言日期": reviewDate ? reviewDate.at(-1) : null,
+                        "評論": review_data[0][2].at(-1)[0][0],
+                        "評論分數": review_data[0][2][0][0]
                     });
                 });
                 page++;
@@ -147,24 +147,24 @@ class GoogleMapsCommentCrawler {
             console.log(`等待 ${waitTime / 1000} 秒後抓取下一頁...`);
             await new Promise(resolve => setTimeout(resolve, waitTime));
         }
-        return comments;
+        return reviews;
     }
 }
 
-const fetchStoreCommentsByName = async (storeName, pageCount = 1, maxWaitingInterval = 5000) => {
+const fetchStoreReviewsByName = async (storeName, pageCount = 1, maxWaitingInterval = 5000) => {
     if (!storeName) {
         throw new Error("請輸入店名");
     }
 
-    const crawler = new GoogleMapsCommentCrawler();
+    const crawler = new GoogleMapsReviewCrawler();
     await crawler.initialized;
     const storeId = await crawler.getStoreId(storeName);
     if (!storeId) throw new Error("無法獲取商家 ID");
 
     console.log(`商家 ID: ${storeId}`);
-    const comments = await crawler.getComments(storeId, pageCount, 2, maxWaitingInterval);
+    const reviews = await crawler.getReviews(storeId, pageCount, 2, maxWaitingInterval);
 
-    return comments;
+    return reviews;
 }
 
 const fetchGoogleMapsStores = async (storeName) => {
@@ -172,24 +172,24 @@ const fetchGoogleMapsStores = async (storeName) => {
         throw new Error("請輸入店名");
     }
 
-    const crawler = new GoogleMapsCommentCrawler();
+    const crawler = new GoogleMapsReviewCrawler();
     await crawler.initialized;
     const storeArray = await crawler.getRelatedStores(storeName);
 
     return storeArray;
 }
 
-const fetchStoreCommentsById = async (storeId, pageCount = 1, maxWaitingInterval = 5000) => {
+const fetchStoreReviewsById = async (storeId, pageCount = 1, maxWaitingInterval = 5000) => {
     if (!storeId) {
         throw new Error("請輸入商家 ID");
     }
 
-    const crawler = new GoogleMapsCommentCrawler();
+    const crawler = new GoogleMapsReviewCrawler();
     await crawler.initialized;
-    const comments = await crawler.getComments(storeId, pageCount, 2, maxWaitingInterval);
+    const reviews = await crawler.getReviews(storeId, pageCount, 2, maxWaitingInterval);
 
-    return comments;
+    return reviews;
 }
 
 // ESM 匯出
-export { fetchStoreCommentsByName, fetchGoogleMapsStores, fetchStoreCommentsById };
+export { fetchStoreReviewsByName, fetchGoogleMapsStores, fetchStoreReviewsById };
